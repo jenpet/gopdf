@@ -600,6 +600,22 @@ func (gp *GoPdf) Image(picPath string, x float64, y float64, rect *Rect) error {
 	return gp.imageByHolder(imgh, imageOptions)
 }
 
+func (gp *GoPdf) ImageFromReader(imgReader io.Reader, x float64, y float64, rect *Rect) error {
+	rect = rect.UnitsToPoints(gp.config.Unit)
+	imgh, err := ImageHolderByReader(bufio.NewReader(imgReader))
+	if err != nil {
+		return err
+	}
+
+	imageOptions := ImageOptions{
+		X:    x,
+		Y:    y,
+		Rect: rect,
+	}
+
+	return gp.imageByHolder(imgh, imageOptions)
+}
+
 func (gp *GoPdf) ImageFrom(img image.Image, x float64, y float64, rect *Rect) error {
 	gp.UnitsToPointsVar(&x, &y)
 	rect = rect.UnitsToPoints(gp.config.Unit)
@@ -615,18 +631,7 @@ func (gp *GoPdf) ImageFrom(img image.Image, x float64, y float64, rect *Rect) er
 		}
 	}()
 
-	imgh, err := ImageHolderByReader(bufio.NewReader(r))
-	if err != nil {
-		return err
-	}
-
-	imageOptions := ImageOptions{
-		X:    x,
-		Y:    y,
-		Rect: rect,
-	}
-
-	return gp.imageByHolder(imgh, imageOptions)
+	return gp.ImageFromReader(bufio.NewReader(r), x,y,rect)
 }
 
 //AddPage : add new page
